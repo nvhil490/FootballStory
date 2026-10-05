@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FootballStory — V1</title>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#07110d;--panel:#0e1c16;--panel2:#13251d;--green:#31d17c;--green2:#1fa95f;--text:#f4f7f5;--muted:#9eaaa4;--danger:#ff5f68;--gold:#f3c969}
+body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at top,#163b2a 0,#07110d 45%,#040806 100%);color:var(--text);min-height:100vh}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh;padding:24px 16px 40px}
+.screen{width:min(920px,100%);margin:auto}
+.card{background:rgba(14,28,22,.94);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:24px;box-shadow:0 18px 60px rgba(0,0,0,.28)}
+.home{min-height:calc(100vh - 64px);display:flex;align-items:center;justify-content:center;text-align:center}
+.logo{font-size:clamp(42px,9vw,82px);font-weight:900;letter-spacing:-4px;margin:0 0 12px}
+.logo span{color:var(--green)}
+.subtitle{color:#c7d0cb;max-width:620px;margin:0 auto 34px;font-size:17px;line-height:1.6}
+.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{border:0;border-radius:14px;padding:14px 22px;font-weight:800;color:white;background:var(--green2);transition:.18s}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.btn.secondary{background:#20342b;border:1px solid rgba(255,255,255,.1)}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.14)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+h1,h2,h3{margin-top:0}
+.header{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:18px}
+.step{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--green);font-weight:800}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.choice{background:#12231b;border:1px solid rgba(255,255,255,.08);border-radius:15px;padding:15px;text-align:left;color:white;min-height:60px}
+.choice:hover{border-color:var(--green);background:#173024}
+.choice.selected{border:2px solid var(--green);background:#173d2b}
+.country{display:flex;align-items:center;gap:10px}
+.flag{font-size:23px}
+.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.field{display:flex;flex-direction:column;gap:7px}
+.field label{font-size:13px;color:var(--muted);font-weight:700}
+.field input,.field select{width:100%;background:#09140f;border:1px solid rgba(255,255,255,.12);color:white;border-radius:12px;padding:13px;outline:none}
+.field input:focus,.field select:focus{border-color:var(--green)}
+.full{grid-column:1/-1}
+.section-title{margin:26px 0 12px;font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.hair-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:9px}
+.hair{padding:12px 8px;border-radius:13px;background:#102018;border:1px solid rgba(255,255,255,.08);color:white;text-align:center}
+.hair .icon{display:block;font-size:29px;margin-bottom:5px}
+.notice{padding:14px 16px;border-radius:14px;background:#0b1711;border:1px solid rgba(49,209,124,.22);color:#c9d5ce;margin:15px 0;line-height:1.5}
+.footer-actions{display:flex;justify-content:space-between;gap:10px;margin-top:24px}
+.career-top{display:grid;grid-template-columns:1.5fr repeat(3,1fr);gap:10px}
+.stat{background:#0b1711;border-radius:15px;padding:14px;border:1px solid rgba(255,255,255,.07)}
+.stat small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase}
+.stat strong{display:block;font-size:20px;margin-top:5px}
+.seasonbar{display:flex;justify-content:space-between;gap:15px;align-items:center;margin:20px 0 12px}
+.choice-list{display:grid;gap:10px}
+.event{border-left:4px solid var(--gold);background:#181b14;border-radius:14px;padding:15px;margin-bottom:14px}
+.event.injury{border-left-color:var(--danger)}
+.type{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--green);font-weight:800}
+.muted{color:var(--muted)}
+.hidden{display:none!important}
+.result{font-size:18px;font-weight:800;margin:16px 0}
+@media(max-width:680px){.app{padding:14px 10px 28px}.card{padding:18px;border-radius:18px}.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.career-top{grid-template-columns:1fr 1fr}.career-top .stat:first-child{grid-column:1/-1}.footer-actions{flex-direction:column}.footer-actions .btn{width:100%}}
+</style>
+</head>
+<body>
+<div class="app">
+  <main id="app" class="screen"></main>
+</div>
+
+<script>
+const countries = [
+ ["🇫🇷","France"],["🏴","Angleterre"],["🇩🇪","Allemagne"],["🇪🇸","Espagne"],["🇨🇭","Suisse"],["🇵🇹","Portugal"],["🇮🇹","Italie"],["🇳🇱","Pays-Bas"],["🇹🇷","Turquie"],
+ ["🇸🇪","Suède"],["🇩🇰","Danemark"],["🇳🇴","Norvège"],
+ ["🇩🇿","Algérie"],["🇲🇦","Maroc"],["🇹🇳","Tunisie"],["🇨🇲","Cameroun"],["🇨🇮","Côte d’Ivoire"],["🇸🇳","Sénégal"],["🇨🇩","Congo RDC"],["🇪🇬","Égypte"],
+ ["🇲🇽","Mexique"],["🇨🇴","Colombie"],["🇦🇷","Argentine"],["🇧🇷","Brésil"],["🇺🇸","États-Unis"],["🇨🇦","Canada"]
+];
+
+const clubs = {
+ L1:["Paris","Marseille","Lyon","Monaco","Lille","Rennes","Angers","Le Mans","Lens","Paris CF","Strasbourg","Auxerre","Brest","Lorient","Toulouse","Nice","Troyes","Le Havre"],
+ L2:["Saint-Étienne","Red Star","Reims","Montpellier","Metz","Nancy-Lorraine","Annecy","Sochaux-Montbéliard","Dijon","Pau","Guingamp","Dunkerque","Grenoble","Rodez","Nantes","Clermont","Boulogne","Laval"],
+ L3:["La Roche","Rouen","Concarneau","Versailles","Amiens","Cannes","Caen","Le Puy","Fleury","Thionville","Paris 13","Bastia","QRM","Orléans","Valenciennes","Aubagne","Bourg-en-Bresse","Villefranche"]
+};
+
+const positions=["BU","AG","AD","MOC","MC","DG","DD","DC","GK"];
+const haircuts=["Court","Dégradé","Dégradé + dessus long","Bouclé","Afro","Dreadlocks","Tresses","Mi-long","Long","Rasé","Frange","Originale"];
+const hairColors=["Noir","Brun foncé","Brun","Châtain","Blond","Blond clair","Roux","Gris"];
+const skinTones=["Très clair","Clair","Beige","Mat","Brun","Foncé","Très foncé"];
+
+let state={
+ screen:"home", nation:null, skin:null, haircut:null, hairColor:null, first:"", last:"", birth:"", position:null,
+ level:null, division:null, club:null, money:0, season:1, age:null, confidence:50, performance:50, morale:50, lastEvent:null
+};
+
+function el(html){return html}
+function render(){
+ const a=document.getElementById("app");
+ if(state.screen==="home") a.innerHTML=home();
+ if(state.screen==="nation") a.innerHTML=nation();
+ if(state.screen==="custom") a.innerHTML=custom();
+ if(state.screen==="career") a.innerHTML=career();
+ bind();
+}
+function home(){return `<section class="home"><div>
+ <div class="step">V1 • Mode carrière</div>
+ <h1 class="logo">Football<span>Story</span></h1>
+ <p class="subtitle">« Un nom, une nation, un club… et peut-être une des plus belles histoires qui va s’écrire. »</p>
+ <div class="actions"><button class="btn" id="new">Nouvelle partie</button><button class="btn secondary" id="shop">Boutique</button></div>
+ <p id="shopmsg" class="muted"></p>
+ </div></section>`}
+
+function nation(){return `<div class="card">
+ <div class="header"><div><div class="step">Étape 1</div><h2>Choisis ta nation</h2></div></div>
+ <p class="muted">Cette nation sera conservée pour ta carrière.</p>
+ <div class="grid">${countries.map(c=>`<button class="choice country ${state.nation===c[1]?"selected":""}" data-nation="${c[1]}"><span class="flag">${c[0]}</span>${c[1]}</button>`).join("")}</div>
+ <div class="footer-actions"><button class="btn secondary" id="backHome">Retour</button><button class="btn" id="toCustom" ${state.nation?"":"disabled"}>Continuer</button></div>
+ </div>`}
+
+function custom(){
+ return `<div class="card">
+ <div class="header"><div><div class="step">Étape 2</div><h2>Crée ton joueur</h2></div><div class="muted">${state.nation}</div></div>
+ <div class="section-title">Couleur de peau</div>
+ <div class="grid">${skinTones.map((s,i)=>`<button class="choice ${state.skin===s?"selected":""}" data-skin="${s}"><span style="display:inline-block;width:26px;height:26px;border-radius:50%;vertical-align:middle;margin-right:8px;background:hsl(${25+i*3},${35+i*7}%,${90-i*11}%);border:1px solid #fff3"></span>${s}</button>`).join("")}</div>
+ <div class="section-title">Coupe de cheveux</div>
+ <div class="hair-grid">${haircuts.map(h=>`<button class="hair ${state.haircut===h?"selected":""}" data-hair="${h}"><span class="icon">💇</span>${h}</button>`).join("")}</div>
+ <div class="section-title">Couleur des cheveux</div>
+ <div class="grid">${hairColors.map(c=>`<button class="choice ${state.hairColor===c?"selected":""}" data-haircolor="${c}">${c}</button>`).join("")}</div>
+ <div class="section-title">Identité</div>
+ <div class="formgrid">
+  <div class="field"><label>Prénom</label><input id="first" value="${esc(state.first)}" placeholder="Prénom"></div>
+  <div class="field"><label>Nom</label><input id="last" value="${esc(state.last)}" placeholder="Nom"></div>
+  <div class="field"><label>Date de naissance</label><input id="birth" type="date" value="${state.birth}"></div>
+  <div class="field"><label>Position</label><select id="position"><option value="">Choisir</option>${positions.map(p=>`<option ${state.position===p?"selected":""}>${p}</option>`).join("")}</select></div>
+ </div>
+ <div class="notice">Âge autorisé : <strong>16 à 40 ans</strong>. Le niveau et le club de départ seront attribués aléatoirement selon le niveau.</div>
+ <div class="footer-actions"><button class="btn secondary" id="backNation">Retour</button><button class="btn" id="create" >Créer ma carrière</button></div>
+ </div>`
+}
+
+function career(){
+ const p=state;
+ return `<div>
+ <div class="career-top">
+  <div class="stat"><small>Joueur</small><strong>${esc(p.first)} ${esc(p.last)}</strong></div>
+  <div class="stat"><small>Niveau</small><strong>${p.level}</strong></div>
+  <div class="stat"><small>Âge</small><strong>${p.age} ans</strong></div>
+  <div class="stat"><small>Club</small><strong>${p.club}</strong></div>
+  <div class="stat"><small>Compte</small><strong>${p.money.toLocaleString("fr-FR")} €</strong></div>
+ </div>
+ <div class="seasonbar"><div><div class="step">Saison ${p.season}</div><h2>${p.age<40?"Une nouvelle saison commence":"Fin de carrière"}</h2></div><div class="muted">Confiance ${p.confidence}% • Performance ${p.performance}%</div></div>
+ ${p.lastEvent?`<div class="event ${p.lastEvent.injury?"injury":""}"><div class="type">${p.lastEvent.title}</div><p>${p.lastEvent.text}</p></div>`:""}
+ ${p.age<40 ? seasonChoices() : endCareer()}
+ </div>`
+}
+
+function seasonChoices(){
+ return `<div class="card"><h3>Choisis ton orientation</h3><p class="muted">Cette saison comporte des choix liés aux matchs, à l’entraînement et à la vie privée.</p>
+ <div class="choice-list">
+  <button class="choice" data-action="match">⚽ Match — Situation importante</button>
+  <button class="choice" data-action="match">⚽ Match — Moment décisif</button>
+  <button class="choice" data-action="training">🏋️ Entraînement — Travail supplémentaire</button>
+  <button class="choice" data-action="training">🏋️ Entraînement — Préparation</button>
+  <button class="choice" data-action="private">❤️ Vie privée — Faire un choix personnel</button>
+ </div>
+ <div class="notice">Des événements inattendus peuvent également survenir pendant la carrière, notamment des blessures mineures, moyennes ou majeures.</div>
+ </div>`
+}
+function endCareer(){return `<div class="card"><h3>🏁 Fin de carrière</h3><p>Ton joueur a atteint 40 ans. Son aventure FootballStory se termine ici.</p></div>`}
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+
+function validAge(date){
+ if(!date)return null;
+ const d=new Date(date+"T00:00:00"), now=new Date();
+ let age=now.getFullYear()-d.getFullYear();
+ const before=now.getMonth()<d.getMonth() || (now.getMonth()===d.getMonth() && now.getDate()<d.getDate());
+ if(before)age--;
+ return age;
+}
+
+function randomCareer(){
+ const level=Math.floor(Math.random()*60)+40;
+ let division=level<=55?"L3":level<=65?"L2":"L1";
+ const list=clubs[division];
+ const club=list[Math.floor(Math.random()*list.length)];
+ state.level=level; state.division=division; state.club=club; state.money=1000;
+ state.confidence=50;state.performance=50;state.morale=50;state.lastEvent=null;
+}
+
+function bind(){
+ document.getElementById("new")?.addEventListener("click",()=>{state={...state,screen:"nation"};render()});
+ document.getElementById("shop")?.addEventListener("click",()=>{document.getElementById("shopmsg").textContent="La Boutique sera développée plus tard."});
+ document.getElementById("backHome")?.addEventListener("click",()=>{state.screen="home";render()});
+ document.querySelectorAll("[data-nation]").forEach(b=>b.addEventListener("click",()=>{state.nation=b.dataset.nation;render()}));
+ document.getElementById("toCustom")?.addEventListener("click",()=>{if(state.nation){state.screen="custom";render()}});
+ document.getElementById("backNation")?.addEventListener("click",()=>{state.screen="nation";render()});
+ document.querySelectorAll("[data-skin]").forEach(b=>b.addEventListener("click",()=>{state.skin=b.dataset.skin;render()}));
+ document.querySelectorAll("[data-hair]").forEach(b=>b.addEventListener("click",()=>{state.haircut=b.dataset.hair;render()}));
+ document.querySelectorAll("[data-haircolor]").forEach(b=>b.addEventListener("click",()=>{state.hairColor=b.dataset.haircolor;render()}));
+ document.getElementById("create")?.addEventListener("click",()=>{
+   state.first=document.getElementById("first").value.trim();
+   state.last=document.getElementById("last").value.trim();
+   state.birth=document.getElementById("birth").value;
+   state.position=document.getElementById("position").value;
+   const age=validAge(state.birth);
+   if(!state.first||!state.last||!state.skin||!state.haircut||!state.hairColor||!state.position||age===null||age<16||age>40){
+     alert("Complète tous les champs et choisis un âge entre 16 et 40 ans."); return;
+   }
+   state.age=age;state.season=1;randomCareer();state.screen="career";render();
+ });
+ document.querySelectorAll("[data-action]").forEach(b=>b.addEventListener("click",()=>seasonAction(b.dataset.action)));
+}
+
+function seasonAction(type){
+ let delta=type==="match"?Math.floor(Math.random()*15)+3:type==="training"?Math.floor(Math.random()*12)+2:Math.floor(Math.random()*10)+1;
+ if(type==="match"){state.performance=Math.min(100,state.performance+delta);state.confidence=Math.min(100,state.confidence+delta)}
+ if(type==="training"){state.performance=Math.min(100,state.performance+delta);state.morale=Math.min(100,state.morale+3)}
+ if(type==="private"){state.morale=Math.min(100,state.morale+delta)}
+ const roll=Math.random();
+ if(roll<.10) state.lastEvent={injury:true,title:"Blessure majeure",text:"Une blessure majeure survient et perturbe fortement ta saison."};
+ else if(roll<.25) state.lastEvent={injury:true,title:"Blessure moyenne",text:"Une blessure moyenne vient perturber ta saison."};
+ else if(roll<.40) state.lastEvent={injury:true,title:"Blessure mineure",text:"Une blessure mineure vient ralentir ta saison."};
+ else state.lastEvent={title:"Événement de saison",text:"Ton choix a eu une influence sur ta saison."};
+ state.season++;
+ if(state.age<40)state.age++;
+ render();
+}
+render();
+</script>
+</body>
+</html>
